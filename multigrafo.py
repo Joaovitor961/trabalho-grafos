@@ -1,11 +1,12 @@
 from collections import defaultdict, deque
+import pandas as pd
 import math
 
 class Multigrafo:
     def __init__(self):
         self.V = set()
-        self.E = []      # Arestas bidirecionais
-        self.A = []      # Arcos direcionais
+        self.E = []     
+        self.A = []      
         self.VR = set()
         self.ER = set()
         self.AR = set()
@@ -125,6 +126,35 @@ class Multigrafo:
             'Diâmetro': diametro
         }
 
+    def vertices_as_dataframe(self):
+        data = [
+            {
+                "Vértice": v,
+                "Demanda": self.demanda_vertices.get(v, 0),
+                "Obrigatório": v in self.VR
+            }
+            for v in self.V
+        ]
+        return pd.DataFrame(data)
+    
+    def arestas_as_dataframe(self):
+        data = [
+            {
+                "Origem": u,
+                "Destino": v,
+                "Custo": custo,
+                "Demanda": demanda,
+                "Obrigatória": frozenset((u, v)) in self.ER
+            }
+            for u, v, custo, demanda in self.E
+        ]
+        return pd.DataFrame(data)
+
+
+    def estatisticas_as_dataframe(self):
+        stats = self.estatisticas()
+        return pd.DataFrame(stats.items(), columns=["Métrica", "Valor"])
+    
     def carregar_de_arquivo(self, caminho_arquivo: str):
         with open(caminho_arquivo, "r") as f:
             linhas = f.readlines()
